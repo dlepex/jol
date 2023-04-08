@@ -27,6 +27,8 @@ package org.openjdk.jol.info;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 /**
  * Basic class to walk object graphs.

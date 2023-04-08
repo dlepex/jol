@@ -39,6 +39,11 @@ import java.util.HashMap;
  */
 public class GraphWalker extends AbstractGraphWalker {
 
+    public static  GraphWalkerFieldFilter FIELDS_FILTER = (owningClass, field, e) -> {
+        Class<?> c = field.getDeclaringClass();
+        return c.isEnum() || c.isAnnotation();
+    };
+
     private final GraphVisitor[] visitors;
     private final HashMap<Class<?>, Long> sizeCache;
 
@@ -73,7 +78,7 @@ public class GraphWalker extends AbstractGraphWalker {
             Class<?> cl = o.getClass();
 
             if (cl.isArray()) {
-                if (cl.getComponentType().isPrimitive()) {
+                if (cl.getComponentType().isPrimitive() || cl.getComponentType().isEnum()) {
                     // Nothing to do here
                     continue;
                 }
@@ -101,6 +106,8 @@ public class GraphWalker extends AbstractGraphWalker {
 
                 for (Field f : getAllReferenceFields(cl)) {
                     Object e = ObjectUtils.value(o, f);
+                    if (FIELDS_FILTER.isFieldIgnored(cl, f, e)) continue;
+
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new FieldGraphPathRecord(cGpr, f.getName(), cGpr.depth() + 1, e);
                         data.addRecord(gpr);
